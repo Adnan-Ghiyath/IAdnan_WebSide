@@ -680,3 +680,46 @@ NAV ITEM ========== */
   z-index: 1;
   text-shadow: 0 2px 10px rgba(79, 134, 247, 0.5);
 }
+/* أضف هذا الكود في نهاية ملف CSS الخاص بك */
+
+/* إخفاء Header على الأجهزة المحمولة */
+@media (max-width: 768px) {
+  .header {
+    display: none !important;
+  }
+
+  /* إخفاء زر Toggle أيضاً على الجوال */
+  .header-toggle {
+    display: none !important;
+  }
+
+  /* تعديل المسافة العلوية للمحتوى الرئيسي */
+  body {
+    padding-top: 0 !important;
+  }
+
+  .main {
+    margin-top: 20px !important;
+  }
+
+  /* التأكد من إزالة أي padding علوي إضافي */
+  .rail-container {
+    padding-top: 1rem !important;
+  }
+}
+
+/* للشاشات الصغيرة جداً (الهواتف الصغيرة) */
+@media (max-width: 480px) {
+  .header {
+    display: none !important;
+  }
+
+  .header-toggle {
+    display: none !important;
+  }
+
+  .main {
+    margin-top: 15px !important;
+    padding: 0.8rem !important;
+  }
+}
