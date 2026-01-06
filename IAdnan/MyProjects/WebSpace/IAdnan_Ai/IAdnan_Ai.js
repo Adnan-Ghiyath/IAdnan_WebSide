@@ -287,7 +287,7 @@ async function sendMessage() {
   } catch (error) {
     hideTypingIndicator();
     console.error("خطأ:", error);
-    const errorMessage = `❌ حدث خطأ: ${error.message}\n\nقام صانعي عدنان ب زالوة مفتحاي للاسباب التالية::\n1. صحة API Key\n2.حماية رصيد في حسابه\n3. سرقة المفتاح\n\n تكلم مع صانعي ودعه يعطيك الصلاحية لاستخدامي`;
+    const errorMessage = `❌ حدث خطأ: ${error.message}\n\nقام صانعي عدنان ب أزالة المفتاح الخاص بي للأسباب التالية::\n1. صحة API Key\n2.الحفاظ على الرصيد \n3. سرقة المفتاح\n\n😊 تكلم مع صانعي ودعه يعطيك الصلاحية لاستخدامي`;
     addMessageToUI("assistant", errorMessage);
     messages.push({ role: "assistant", content: errorMessage });
   } finally {
@@ -311,5 +311,6 @@ elements.messageInput.addEventListener("keypress", (e) => {
 
 // تحميل الشخصيات من XML عند فتح الصفحة
 loadPersonalitiesFromXML();
+
 
 
