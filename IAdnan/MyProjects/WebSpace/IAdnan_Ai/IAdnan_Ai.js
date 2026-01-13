@@ -5,7 +5,7 @@ let isLoading = false;
 let topics = []; // سيتم ملؤها من XML
 let defaultPersonality = ""; // الشخصية الافتراضية
 //
-const API_KEY = "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"; //Dont take it pleas
+const API_KEY = "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"; //Dont take it pleas
 const elements = {
   messagesContainer: document.getElementById("messagesContainer"),
   messageInput: document.getElementById("messageInput"),
@@ -311,6 +311,7 @@ elements.messageInput.addEventListener("keypress", (e) => {
 
 // تحميل الشخصيات من XML عند فتح الصفحة
 loadPersonalitiesFromXML();
+
 
 
 
