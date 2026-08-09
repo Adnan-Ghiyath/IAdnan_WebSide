@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Checkout – IndexedDB Basket</title>
+
+    <style>
+      /* =========================================================
+         ✅ Code Overview (Beginner Friendly)
+         ---------------------------------------------------------
+         ✅ Purpose:
+            - Checkout page that reads the basket from IndexedDB
+            - Shows a summary table (Product / Qty / Price / Total)
+            - Calculates total amount
+            - Allows clearing the basket
+            - Provides a demo "Confirm Order" action
+
+         ✅ Layout:
+            - Header → title + back button
+            - Basket Summary → table + total + actions
+            - Status Bar → dot + message (DB state)
+
+         ✅ Flow (High Level):
+            1️⃣ Open the SAME IndexedDB database used in shop (ShopDB, version 1)
+            2️⃣ Read all items from the "cart" store
+            3️⃣ Render rows into the table body
+            4️⃣ Calculate total = Σ(price × qty)
+            5️⃣ Clear basket uses cartStore.clear()
+         ========================================================= */
+
+      * {
+        box-sizing: border-box; /* ✅ predictable sizing */
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+
+        /* ✅ center the checkout card */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background: radial-gradient(circle at top, #111827, #020617 60%);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: #f9fafb;
+      }
+
+      /* ✅ main checkout container */
+      .checkout-shell {
+        width: 900px;
+        max-width: 95vw;
+        background: #020617;
+        border-radius: 20px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 24px 26px 28px;
+
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* ✅ top header (title + back button) */
+      .checkout-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .checkout-header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+      }
+
+      .checkout-header p {
+        margin: 4px 0 0;
+        color: #9ca3af;
+      }
+
+      /* ✅ buttons (shared) */
+      button {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        background: #2563eb;
+        transition: 0.18s;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.45);
+      }
+
+      button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: #6b7280;
+      }
+
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      .btn-danger {
+        background: #dc2626;
+      }
+
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      /* ✅ box that holds the table + totals */
+      .table-box {
+        background: #030712;
+        border-radius: 16px;
+        padding: 14px 16px;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+      }
+
+      .section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      /* ✅ table styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #020617;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 7px 9px;
+        border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      }
+
+      th {
+        background: #0f172a;
+        font-weight: 600;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #020617;
+      }
+      tbody tr:nth-child(odd) {
+        background: #030712;
+      }
+
+      .empty {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-top: 6px;
+      }
+
+      /* ✅ total row */
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 1rem;
+      }
+
+      .total-value {
+        font-weight: 700;
+        color: #4ade80;
+      }
+
+      /* ✅ status bar (bottom) */
+      .status-bar {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+
+      .dot-ok {
+        background: #22c55e; /* ✅ green */
+      }
+      .dot-wait {
+        background: #facc15; /* ✅ yellow */
+      }
+
+      .status-row {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="checkout-shell">
+      <!-- ======================================================
+           ✅ HEADER
+           ====================================================== -->
+      <div class="checkout-header">
+        <div>
+          <h1>Checkout</h1>
+          <p>Review your basket items stored in IndexedDB</p>
+        </div>
+
+        <!-- ✅ Back to shop page -->
+        <button class="btn-secondary" onclick="goBack()">⬅ Back to Shop</button>
+      </div>
+
+      <!-- ======================================================
+           ✅ BASKET TABLE
+           ====================================================== -->
+      <div class="table-box">
+        <div class="section-title">🧺 Basket Summary</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th style="width: 80px">Qty</th>
+              <th style="width: 90px">Price</th>
+              <th style="width: 100px">Total</th>
+            </tr>
+          </thead>
+
+          <!-- ✅ JS will insert rows here -->
+          <tbody id="basketBody"></tbody>
+        </table>
+
+        <!-- ✅ Small helper message under the table -->
+        <div id="emptyMsg" class="empty">Loading basket...</div>
+
+        <!-- ✅ Total amount summary -->
+        <div class="summary-row">
+          <span>Total Amount:</span>
+          <span id="totalAmount" class="total-value">$0.00</span>
+        </div>
+
+        <!-- ✅ Actions -->
+        <div style="margin-top: 12px; display: flex; gap: 8px">
+          <button class="btn-danger" onclick="clearBasket()">
+            🗑 Clear Basket
+          </button>
+          <button onclick="confirmOrder()">✅ Confirm Order</button>
+        </div>
+      </div>
+
+      <!-- ======================================================
+           ✅ STATUS BAR
+           ====================================================== -->
+      <div class="status-bar">
+        <div class="status-row">
+          <span id="statusDot" class="status-dot dot-wait"></span>
+          <span id="statusText">Opening database...</span>
+        </div>
+        <span>Basket stored in IndexedDB → cart</span>
+      </div>
+    </div>
+
+    <script>
+      /* =========================================================
+         ✅ Code Overview (JavaScript Part)
+         ---------------------------------------------------------
+         ✅ Goal:
+            - Open existing IndexedDB database (ShopDB)
+            - Read all items from "cart" store
+            - Render basket rows in a table
+            - Compute total amount
+            - Provide clear + confirm + back navigation
+
+         ✅ Important Rule:
+            - DB name + version must match the shop page:
+              "ShopDB" and version 1 ✅
+         ========================================================= */
+
+      /* =========================================================
+         ✅ 1) GLOBALS + DOM CACHING
+         ========================================================= */
+
+      // ✅ IndexedDB database reference (set after opening)
+      let db = null;
+
+      // ✅ Cache DOM references once
+      const basketBody = document.getElementById("basketBody");
+      const emptyMsg = document.getElementById("emptyMsg");
+      const totalAmount = document.getElementById("totalAmount");
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+
+      /* =========================================================
+         ✅ 2) STATUS HELPERS (dot + message)
+         ========================================================= */
+
+      // ✅ Show OK status (green dot)
+      function setStatusOk(msg) {
+        statusDot.classList.remove("dot-wait");
+        statusDot.classList.add("dot-ok");
+        statusText.textContent = msg;
+      }
+
+      // ✅ Show waiting/busy status (yellow dot)
+      function setStatusWait(msg) {
+        statusDot.classList.remove("dot-ok");
+        statusDot.classList.add("dot-wait");
+        statusText.textContent = msg;
+      }
+
+      /* =========================================================
+         ✅ 3) OPEN EXISTING DATABASE (ShopDB)
+         ---------------------------------------------------------
+         - Must match the shop page:
+           Name: "ShopDB"
+           Version: 1
+         ========================================================= */
+
+      setStatusWait("Opening database...");
+
+      // ✅ Open database (same as shop)
+      const request = indexedDB.open("ShopDB", 1);
+
+      // ✅ When DB opens successfully
+      request.onsuccess = function (e) {
+        db = e.target.result; // save db reference
+        setStatusOk("Database opened.");
+        loadCart(); // now we can read cart items
+      };
+
+      // ✅ When open fails
+      request.onerror = function () {
+        setStatusWait("Error opening DB.");
+        console.error("DB error");
+      };
+
+      /* =========================================================
+         ✅ 4) LOAD BASKET FROM "cart" STORE
+         ---------------------------------------------------------
+         - Read all cart items
+         - Build table rows
+         - Calculate total
+         ========================================================= */
+
+      function loadCart() {
+        // ✅ Clear old UI before re-render
+        basketBody.innerHTML = "";
+        emptyMsg.textContent = "Loading basket...";
+
+        // ✅ readonly transaction to read cart
+        const tx = db.transaction("cart", "readonly");
+        const store = tx.objectStore("cart");
+
+        // ✅ getAll returns all cart items
+        const req = store.getAll();
+
+        req.onsuccess = function () {
+          const items = req.result;
+
+          // ✅ If basket is empty
+          if (!items || items.length === 0) {
+            emptyMsg.textContent = "Basket is empty.";
+            totalAmount.textContent = "$0.00";
+            return;
+          }
+
+          // ✅ Hide empty message
+          emptyMsg.textContent = "";
+
+          let total = 0;
+
+          // ✅ Build one table row per item
+          items.forEach((item) => {
+            const tr = document.createElement("tr");
+
+            // ✅ row columns:
+            // product name | qty | unit price | item total
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td>${item.quantity}</td>
+              <td>$${item.price.toFixed(2)}</td>
+              <td>$${(item.price * item.quantity).toFixed(2)}</td>
+            `;
+
+            // ✅ accumulate total
+            total += item.price * item.quantity;
+
+            // ✅ append row to table body
+            basketBody.appendChild(tr);
+          });
+
+          // ✅ update total amount UI
+          totalAmount.textContent = "$" + total.toFixed(2);
+        };
+      }
+
+      /* =========================================================
+         ✅ 5) CLEAR BASKET (cartStore.clear)
+         ========================================================= */
+
+      function clearBasket() {
+        if (!confirm("Clear entire basket?")) return;
+
+        // ✅ readwrite transaction because we will delete data
+        const tx = db.transaction("cart", "readwrite");
+        const store = tx.objectStore("cart");
+
+        // ✅ clear all rows in the cart store
+        store.clear().onsuccess = () => {
+          emptyMsg.textContent = "Basket is empty.";
+          basketBody.innerHTML = "";
+          totalAmount.textContent = "$0.00";
+          setStatusOk("Basket cleared.");
+        };
+      }
+
+      /* =========================================================
+         ✅ 6) CONFIRM ORDER (DEMO ONLY)
+         ========================================================= */
+
+      function confirmOrder() {
+        // ✅ In real systems:
+        // - you would send items to a backend (API)
+        // - store order in DB
+        // - handle payment flow
+        alert("Demo only: Order confirmed!");
+      }
+
+      /* =========================================================
+         ✅ 7) NAVIGATION
+         ========================================================= */
+
+      function goBack() {
+        // ✅ Return to shop page
+        window.location.href = "shop.html";
+      }
+    </script>
+  </body>
+</html>

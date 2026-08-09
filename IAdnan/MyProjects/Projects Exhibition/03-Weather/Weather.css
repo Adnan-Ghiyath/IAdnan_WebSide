@@ -1,0 +1,272 @@
+/* =========================================================
+         ✅ Code Overview (Beginner Friendly)
+         ---------------------------------------------------------
+         ✅ Purpose:
+            - A small weather app that works بدون API Key
+            - User searches by city name → app shows:
+              1️⃣ current temperature + humidity + wind
+              2️⃣ 7-day forecast table
+
+         ✅ Flow (High Level):
+            1️⃣ User types city → clicks Search
+            2️⃣ We call Open-Meteo Geocoding API (city → lat/lon)
+            3️⃣ We call Open-Meteo Forecast API (lat/lon → weather)
+            4️⃣ We render the result into the UI
+
+         ✅ Key Concepts:
+            - fetch() + async/await
+            - response.ok check (HTTP error handling)
+            - AbortController (cancel old requests when user searches fast)
+            - UI state (loading spinner + error messages + results section)
+         ========================================================= */
+
+/* ✅ Helps browser choose dark-looking default controls (like date inputs, etc.) */
+:root {
+  color-scheme: dark;
+}
+
+/* ✅ Make width/height calculations predictable */
+* {
+  box-sizing: border-box;
+}
+
+/* ✅ Page background + default font */
+body {
+  margin: 0;
+  padding: 24px;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    sans-serif;
+  background: #0b1020;
+  color: #e9eefc;
+}
+
+/* ✅ Center the app and limit its maximum width */
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* ✅ Card container style (reused in UI blocks) */
+.card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+/* ✅ Horizontal row layout for input + buttons */
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ✅ Main title style */
+h1 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+/* ✅ Slightly faded text (helper class) */
+.muted {
+  opacity: 0.75;
+}
+
+/* ✅ Input design */
+input {
+  flex: 1; /* ✅ take remaining width */
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e9eefc;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  min-width: 220px; /* ✅ prevents being too small */
+}
+
+/* ✅ Buttons style */
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: #4f7cff;
+  color: white;
+  font-weight: 800;
+}
+
+/* ✅ Secondary button (less emphasis) */
+button.secondary {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ✅ Disabled buttons look inactive */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ✅ Loading area (spinner + text) hidden by default */
+.status {
+  margin-top: 10px;
+  display: none; /* ✅ shown only while loading */
+  align-items: center;
+  gap: 10px;
+}
+
+/* ✅ Small spinner circle */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: white; /* ✅ visible rotating top */
+  animation: spin 0.85s linear infinite;
+}
+
+/* ✅ Animation definition for spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ✅ Two-column layout for results (current + forecast table) */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* ✅ On small screens, stack cards vertically */
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ✅ Big temperature text */
+.big {
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  margin: 10px 0 6px;
+}
+
+/* ✅ Small pill badges (humidity/wind) */
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-right: 6px;
+  margin-top: 6px;
+}
+
+/* ✅ Wrapper that lets the forecast table scroll sideways
+   instead of overflowing/breaking the page on very narrow
+   screens — the table itself is untouched. */
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ✅ Forecast table style */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 14px;
+}
+
+th {
+  opacity: 0.85;
+  font-weight: 800;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* ✅ Error box hidden by default (shown only when needed) */
+.error {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 79, 109, 0.45);
+  background: rgba(255, 79, 109, 0.12);
+}
+
+/* =========================================================
+   ✅ MOBILE RESPONSIVE ADDITIONS
+   ========================================================= */
+
+/* ✅ Tablets / small screens */
+@media (max-width: 700px) {
+  body {
+    padding: 14px;
+  }
+  .card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  h1 {
+    font-size: 16px;
+  }
+  .big {
+    font-size: 34px;
+  }
+}
+
+/* ✅ Phones: stack the search row (input above, buttons below) */
+@media (max-width: 560px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  input {
+    min-width: 0;
+  }
+  button {
+    width: 100%;
+    min-height: 44px; /* ✅ comfortable tap target */
+  }
+  th,
+  td {
+    padding: 8px 8px;
+    font-size: 13px;
+  }
+}
+
+/* ✅ Small phones: tighten the forecast table further */
+@media (max-width: 380px) {
+  th,
+  td {
+    padding: 6px 6px;
+    font-size: 12px;
+  }
+  .big {
+    font-size: 28px;
+  }
+}
