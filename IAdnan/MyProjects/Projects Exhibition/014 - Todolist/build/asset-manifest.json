@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "./static/css/main.fba90dc4.css",
+    "main.js": "./static/js/main.bcd963bd.js",
+    "static/js/453.78b0d45c.chunk.js": "./static/js/453.78b0d45c.chunk.js",
+    "static/media/KaushanScript-Regular.ttf": "./static/media/KaushanScript-Regular.a668b3d996f7c50fb3fe.ttf",
+    "index.html": "./index.html",
+    "main.fba90dc4.css.map": "./static/css/main.fba90dc4.css.map",
+    "main.bcd963bd.js.map": "./static/js/main.bcd963bd.js.map",
+    "453.78b0d45c.chunk.js.map": "./static/js/453.78b0d45c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fba90dc4.css",
+    "static/js/main.bcd963bd.js"
+  ]
+}

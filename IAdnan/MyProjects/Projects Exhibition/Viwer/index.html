@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="Style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="/MainScreen/MainScreenImage/code.ico"
+      type="image/x-icon"
+    />
+  </head>
+  <body>
+    <!-- ===== Hero Section - Light CV Style ===== -->
+    <header class="hero">
+      <div class="hero-content">
+        <img
+          src="https://via.placeholder.com/140"
+          alt="Profile"
+          class="hero-avatar"
+        />
+        <h1 class="hero-name">Your Name</h1>
+        <p class="hero-title">C# Full Stack Developer</p>
+
+        <div class="tech-stack">
+          <span class="tech-badge">C#</span>
+          <span class="tech-badge">.NET</span>
+          <span class="tech-badge">SQL Server</span>
+          <span class="tech-badge">Entity Framework</span>
+          <span class="tech-badge">REST API</span>
+          <span class="tech-badge">React</span>
+        </div>
+
+        <p class="hero-tagline">
+          Building full-stack admin systems with C# & .NET Core
+        </p>
+      </div>
+
+      <div class="scroll-indicator">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+      </div>
+    </header>
+
+    <!-- ===== Transition Bridge ===== -->
+    <section class="transition-bridge">
+      <div class="bridge-content">
+        <span class="bridge-label">Featured Work</span>
+        <h2 class="bridge-title">Selected Projects</h2>
+        <p class="bridge-desc">
+          A look at my most impactful projects reflecting my expertise in
+          building integrated systems
+        </p>
+        <div class="bridge-line"></div>
+      </div>
+    </section>
+
+    <!-- ===== Projects Section - Dark Theme ===== -->
+    <section class="projects-section">
+      <div class="container">
+        <!-- Featured Projects Container -->
+        <div class="featured-container">
+          <div class="featured-header">
+            <span class="featured-header-icon">★</span>
+            <span class="featured-header-text">Featured Projects</span>
+          </div>
+          <div class="projects-featured" id="projects-featured"></div>
+        </div>
+
+        <!-- Other Projects -->
+        <h2 class="section-title">More Projects</h2>
+        <div class="projects-grid" id="projects"></div>
+      </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer">
+      <div class="container">
+        <p>"Have a project in mind?"</p>
+        <a
+          href="https://wa.me/971568929347?text=I%20have%20a%20project%20idea"
+          class="cta-button"
+          target="_blank"
+          >Get in touch</a
+        >
+      </div>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

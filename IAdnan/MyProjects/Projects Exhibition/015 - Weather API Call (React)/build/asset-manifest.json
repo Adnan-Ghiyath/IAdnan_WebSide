@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "./static/css/main.eaa9f41d.css",
+    "main.js": "./static/js/main.11a97961.js",
+    "static/js/453.59f63e45.chunk.js": "./static/js/453.59f63e45.chunk.js",
+    "static/js/38.ef825476.chunk.js": "./static/js/38.ef825476.chunk.js",
+    "static/media/IBMPlexSansArabic-Bold.ttf": "./static/media/IBMPlexSansArabic-Bold.2d1ef4ff414f211c7bb8.ttf",
+    "static/media/IBMPlexSansArabic-SemiBold.ttf": "./static/media/IBMPlexSansArabic-SemiBold.8789cbd484b80906fa28.ttf",
+    "static/media/IBMPlexSansArabic-Thin.ttf": "./static/media/IBMPlexSansArabic-Thin.dc9f1b309f8734bed5f5.ttf",
+    "static/media/IBMPlexSansArabic-ExtraLight.ttf": "./static/media/IBMPlexSansArabic-ExtraLight.8317af85543ebdb9e8ca.ttf",
+    "static/media/IBMPlexSansArabic-Medium.ttf": "./static/media/IBMPlexSansArabic-Medium.8190e73b6515657ce16c.ttf",
+    "static/media/IBMPlexSansArabic-Light.ttf": "./static/media/IBMPlexSansArabic-Light.e091a994e1791543a929.ttf",
+    "static/media/IBMPlexSansArabic-Regular.ttf": "./static/media/IBMPlexSansArabic-Regular.1ce7a8acf967c8b6aa0f.ttf",
+    "index.html": "./index.html",
+    "main.eaa9f41d.css.map": "./static/css/main.eaa9f41d.css.map",
+    "main.11a97961.js.map": "./static/js/main.11a97961.js.map",
+    "453.59f63e45.chunk.js.map": "./static/js/453.59f63e45.chunk.js.map",
+    "38.ef825476.chunk.js.map": "./static/js/38.ef825476.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.eaa9f41d.css",
+    "static/js/main.11a97961.js"
+  ]
+}
